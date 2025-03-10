@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="TestGraphClientLogic">
+      <HintPath>..\TestGraphClientLogic\bin\Release\net8.0\TestGraphClientLogic.dll</HintPath>
+    </Reference>
+    <Reference Include="TestGraphModel">
+      <HintPath>..\..\TestGraphServer\TestGraphModel\bin\Release\net8.0\TestGraphModel.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Mappers\" />
+    <Folder Include="WindowModels\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Models\GraphModelPL.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="QuikGraph" Version="2.5.0" />
+    <PackageReference Include="QuikGraph.Data" Version="2.5.0" />
+  </ItemGroup>
+
+</Project>
