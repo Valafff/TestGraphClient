@@ -4,7 +4,28 @@ using QuikGraph;
 
 namespace TestGraphClient.Models
 {
-    public class GraphPL : BidirectionalGraph<NodePL, EdgePL> { };
+    public class GraphPL : BidirectionalGraph<NodePL, EdgePL>, INotifyPropertyChanged
+    {
+        private int _id;
+        public int Id
+        {
+            get => _id;
+            set { _id = value; OnPropertyChanged(nameof(Id)); }
+        }
+
+        private string _graphName;
+        public string GraphName
+        {
+            get => _graphName;
+            set { _graphName = value; OnPropertyChanged(nameof(GraphName)); }
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    };
 
     public class EdgePL(NodePL source, NodePL target) : IEdge<NodePL>
     {
@@ -22,7 +43,8 @@ namespace TestGraphClient.Models
 
         private string _nodeName;
         public string NodeNamePL 
-        { get => _nodeName;
+        {
+          get => _nodeName;
           set => SetField(ref _nodeName, value);
         }
 
