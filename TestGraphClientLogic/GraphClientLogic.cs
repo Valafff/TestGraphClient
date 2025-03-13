@@ -7,14 +7,14 @@ using TestGraphModel;
 
 namespace TestGraphClientLogic
 {
-    public class TestGraphClientLogic
+    public class GraphClientLogic
     {
         private HttpClient client;
         private string serverUrl;
         private Graph graph;
 
 
-        public TestGraphClientLogic(string _uri = "http://localhost:3000/api/graph")
+        public GraphClientLogic(string _uri = "http://localhost:3000/api/graph")
         {
             serverUrl = _uri;
             client = new HttpClient();
@@ -24,23 +24,32 @@ namespace TestGraphClientLogic
         //Проверка соединения
         public async Task<bool> ConnectionTest()
         {
-            HttpResponseMessage response = await client.GetAsync($"{serverUrl}/ping");
-            return response.IsSuccessStatusCode;
+            try
+            {
+                HttpResponseMessage response = await client.GetAsync($"{serverUrl}/ping");
+               return response.IsSuccessStatusCode;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
         //Получение модели графа
         public async Task<Graph> GetGraph()
         {
-            HttpResponseMessage response = await client.GetAsync($"{serverUrl}/sendgraph");
-            if (response.IsSuccessStatusCode)
+            try
             {
+                HttpResponseMessage response = await client.GetAsync($"{serverUrl}/sendgraph");
                 string content = await response.Content.ReadAsStringAsync();
                 GraphDtoToGrath(content, ref graph, out bool _error);
                 if (_error) return null;
                 return graph;
             }
-            else
+            catch (Exception)
+            {
                 return null;
+            }
         }
 
         //Создание узла

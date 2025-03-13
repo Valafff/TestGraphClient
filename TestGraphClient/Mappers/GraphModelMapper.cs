@@ -32,7 +32,6 @@ namespace TestGraphClient.Mappers
                 EdgePL edgePL = MapEdge(_edge, _nodeMap);
                 graphPL.AddEdge(edgePL);
             }
-
             return graphPL;
         }
 
@@ -173,13 +172,24 @@ namespace TestGraphClient.Mappers
             };
         }
 
-        public static NodeData MapNodeData(NodeDataPL nodeDataPL)
+        public static NodeData MapNodeData(NodeDataPL _nodeDataPL)
         {
-            return new NodeData
+            if (_nodeDataPL != null)
             {
-                SomeText = nodeDataPL.SomeText,
-                SomeValue = nodeDataPL.SomeValue
-            };
+                return new NodeData
+                {
+                    SomeText = _nodeDataPL.SomeText,
+                    SomeValue = _nodeDataPL.SomeValue
+                };
+            }
+            else
+            {
+                return new NodeData
+                {
+                    SomeText = string.Empty,
+                    SomeValue = 0
+                };
+            }
         }
     }
 }

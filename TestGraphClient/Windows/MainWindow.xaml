@@ -5,8 +5,31 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TestGraphClient.Windows"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="800" Width="800">
     <Grid>
-
+        <Grid.RowDefinitions>
+            <RowDefinition Height="25"/>
+            <RowDefinition/>
+            <RowDefinition Height="200"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="67*"/>
+            <ColumnDefinition Width="33*"/>
+        </Grid.ColumnDefinitions>
+        <Menu Grid.Row="0" Grid.ColumnSpan="2">
+            <MenuItem Header="Работа с графом">
+                <MenuItem Header="Тест подключения" Click="ConnTest"/>
+                <MenuItem Header="Получить граф" Click ="GetGraph"/>
+                <MenuItem Header="Создать новый узел" Click="CreateNewNode"/>
+                <MenuItem Header="Редактировать узел"/>
+                <MenuItem Header="Создать ребро"/>
+                <MenuItem Header="Удалить ребро"/>
+                <MenuItem Header="Выход" Name="Exit" Click="Exit_Click"/>
+            </MenuItem>
+        </Menu>
+        <ScrollViewer Grid.Row="2" Grid.ColumnSpan="2"  VerticalScrollBarVisibility="Auto">
+            <ListBox  x:Name="ConsoleListBox" Grid.Row="0" Margin="5" FontFamily="Consolas" FontSize="14"/>
+        </ScrollViewer>
     </Grid>
+
 </Window>
