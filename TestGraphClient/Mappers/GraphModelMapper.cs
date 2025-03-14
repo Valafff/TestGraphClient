@@ -37,7 +37,7 @@ namespace TestGraphClient.Mappers
 
         public static NodePL MapNode(Node node)
         {
-            var nodePL = new NodePL(node.NodeName, node.PortsNumber)
+            var nodePL = new NodePL(node.NodeName, node.Ports)
             {
                 Id = node.Id,
                 PortsNumber = node.PortsNumber,
@@ -47,19 +47,20 @@ namespace TestGraphClient.Mappers
                 //Y = 0 
             };
 
-            // Маппирование портов
-            foreach (var _port in node.Ports)
-            {
-                var portPL = MapPort(_port);
-                if (_port.IsLeftSidePort)
-                {
-                    nodePL.LeftPorts.Add(portPL);
-                }
-                else
-                {
-                    nodePL.RightPorts.Add(portPL);
-                }
-            }
+            //зашито в конструктор ноды
+            //// Маппирование портов
+            //foreach (var _port in node.Ports)
+            //{
+            //    var portPL = MapPort(_port);
+            //    if (_port.IsLeftSidePort)
+            //    {
+            //        nodePL.LeftPorts.Add(portPL);
+            //    }
+            //    else
+            //    {
+            //        nodePL.RightPorts.Add(portPL);
+            //    }
+            //}
             return nodePL;
         }
 

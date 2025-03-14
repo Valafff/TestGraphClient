@@ -22,6 +22,10 @@ public partial class MainWindow : Window
     GraphClientLogic logic = new GraphClientLogic(_uri);
     GraphPL graph = new GraphPL();
 
+    //Работа с визуальной частью
+    private NodePL _draggedNode; // Узел, который перемещается
+    private Point _offset; // Смещение курсора относительно верхнего левого угла узла
+
     public MainWindow()
     {
         InitializeComponent();
@@ -53,6 +57,7 @@ public partial class MainWindow : Window
         }
     }
 
+
     private async void GetGraph(object sender, RoutedEventArgs e)
     {
         SendMessage("Попытка получения графа");
@@ -62,15 +67,18 @@ public partial class MainWindow : Window
             try
             {
                 graph = BLL_to_PL_mapper.MapGraph(temp);
+                DataContext = graph;
                 SendMessage("Граф получен");
             }
             catch (Exception ex)
             {
                 SendMessage($"Ошибка получения графа: {ex}");
             }
-
         }
-        else { SendMessage("Ошибка получения графа: не получен ответ от сервера"); }
+        else
+        {
+            SendMessage("Ошибка получения графа: не получен ответ от сервера");
+        }
     }
 
     private async void CreateNewNode(object sender, RoutedEventArgs e)
@@ -91,5 +99,52 @@ public partial class MainWindow : Window
             }
         }
         else { SendMessage("Ошибка создания нового узла"); }
+    }
+
+    private void ItemsControl_PreviewMouseMove(object sender, MouseEventArgs e)
+    {
+        if (_draggedNode != null && e.LeftButton == MouseButtonState.Pressed)
+        {
+            // Получаем текущую позицию курсора относительно Canvas
+            var canvas = sender as ItemsControl;
+            var position = e.GetPosition(canvas);
+
+            // Обновляем координаты узла с учетом смещения
+            _draggedNode.X = position.X - _offset.X;
+            _draggedNode.Y = position.Y - _offset.Y;
+        }
+    }
+
+    private void Port_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+
+    }
+    private void Node_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        // Получаем узел, на который нажали
+        var contentPresenter = sender as ContentPresenter;
+        _draggedNode = contentPresenter?.DataContext as NodePL;
+
+        if (_draggedNode != null)
+        {
+            // Запоминаем смещение курсора относительно верхнего левого угла узла
+            var position = e.GetPosition(contentPresenter);
+            _offset = new Point(position.X, position.Y);
+
+            // Захватываем мышь, чтобы получать события даже за пределами узла
+            contentPresenter.CaptureMouse();
+        }
+    }
+    private void Node_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (_draggedNode != null)
+        {
+            // Освобождаем мышь
+            var contentPresenter = sender as ContentPresenter;
+            contentPresenter?.ReleaseMouseCapture();
+
+            // Сбрасываем состояние перемещения
+            _draggedNode = null;
+        }
     }
 }

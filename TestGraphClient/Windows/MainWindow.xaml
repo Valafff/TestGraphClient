@@ -27,6 +27,80 @@
                 <MenuItem Header="Выход" Name="Exit" Click="Exit_Click"/>
             </MenuItem>
         </Menu>
+
+        <Grid Grid.Row="1" Grid.Column="0">
+            <!-- Canvas для линий -->
+            <Canvas x:Name="GraphCanvas" />
+            <!-- Отображение узлов -->
+            <ItemsControl ItemsSource="{Binding Vertices}" PreviewMouseMove="ItemsControl_PreviewMouseMove">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Canvas />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemContainerStyle>
+                    <Style TargetType="ContentPresenter">
+                        <Setter Property="Canvas.Left" Value="{Binding X}" />
+                        <Setter Property="Canvas.Top" Value="{Binding Y}" />
+                        <EventSetter Event="PreviewMouseLeftButtonDown" Handler="Node_PreviewMouseLeftButtonDown" />
+                        <EventSetter Event="PreviewMouseLeftButtonUp" Handler="Node_PreviewMouseLeftButtonUp" />
+                    </Style>
+                </ItemsControl.ItemContainerStyle>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <!-- Прямоугольник узла -->
+                            <Border BorderBrush="Black" BorderThickness="2" Background="LightGray" Padding="10" Width="150" Height="100">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding NodeNamePL}" FontWeight="Bold" HorizontalAlignment="Center" />
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Порты слева -->
+                            <ItemsControl ItemsSource="{Binding LeftPorts}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <Canvas />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Ellipse Width="10" Height="10" Fill="Blue" MouseLeftButtonDown="Port_MouseLeftButtonDown"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                                <ItemsControl.ItemContainerStyle>
+                                    <Style TargetType="ContentPresenter">
+                                        <Setter Property="Canvas.Left" Value="-10" />
+                                        <Setter Property="Canvas.Top" Value="{Binding Y}" />
+                                    </Style>
+                                </ItemsControl.ItemContainerStyle>
+                            </ItemsControl>
+
+                            <!-- Порты справа -->
+                            <ItemsControl ItemsSource="{Binding RightPorts}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <Canvas />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Ellipse Width="10" Height="10" Fill="Red" MouseLeftButtonDown="Port_MouseLeftButtonDown"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                                <ItemsControl.ItemContainerStyle>
+                                    <Style TargetType="ContentPresenter">
+                                        <Setter Property="Canvas.Left" Value="140" />
+                                        <Setter Property="Canvas.Top" Value="{Binding Y}" />
+                                    </Style>
+                                </ItemsControl.ItemContainerStyle>
+                            </ItemsControl>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Grid>
+
         <ScrollViewer Grid.Row="2" Grid.ColumnSpan="2"  VerticalScrollBarVisibility="Auto">
             <ListBox  x:Name="ConsoleListBox" Grid.Row="0" Margin="5" FontFamily="Consolas" FontSize="14"/>
         </ScrollViewer>
