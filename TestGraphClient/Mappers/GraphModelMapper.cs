@@ -42,9 +42,8 @@ namespace TestGraphClient.Mappers
                 Id = node.Id,
                 PortsNumber = node.PortsNumber,
                 SimpleDataPL = MapNodeData(node.SimpleData),
-                ////Координаты в BL не хранятся
-                //X = 0,
-                //Y = 0 
+                X = node.X,
+                Y = node.Y
             };
 
             //зашито в конструктор ноды
@@ -133,7 +132,9 @@ namespace TestGraphClient.Mappers
                 Id = _nodePL.Id,
                 PortsNumber = _nodePL.PortsNumber,
                 NodeName = _nodePL.NodeNamePL,
-                SimpleData = MapNodeData(_nodePL.SimpleDataPL)
+                SimpleData = MapNodeData(_nodePL.SimpleDataPL),
+                X = _nodePL.X,
+                Y = _nodePL.Y
             };
 
             // Маппирование портов

@@ -1,0 +1,45 @@
+﻿<Window x:Class="TestGraphClient.Windows.CreateNodeWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TestGraphClient.Windows"
+        mc:Ignorable="d"
+       Title="Создание нового узла" Height="300" Width="400">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Название узла -->
+        <Label Grid.Row="0" Content="Название узла:" />
+        <TextBox Grid.Row="1" x:Name="NodeNameTextBox" />
+
+        <!-- Количество портов -->
+        <Label Grid.Row="2" Content="Количество портов:" />
+        <TextBox Grid.Row="3" x:Name="PortCountTextBox" />
+
+        <!-- Выбор текста из комбобокса -->
+        <Label Grid.Row="4" Content="Выберите текст:" />
+        <ComboBox Grid.Row="5" x:Name="TextComboBox" SelectedIndex="0">
+            <ComboBoxItem Content="Некоторое значение 1" />
+            <ComboBoxItem Content="Некоторое значение 2" />
+            <ComboBoxItem Content="Некоторое значение 3" />
+        </ComboBox>
+
+        <!-- Ввод числа -->
+        <Label Grid.Row="6" Content="Введите число:" />
+        <TextBox Grid.Row="7" x:Name="NumberTextBox" />
+
+        <!-- Кнопка "Создать" -->
+        <Button Grid.Row="8" Content="Создать" Click="CreateButton_Click"  Margin="0,10,0,0" />
+    </Grid>
+</Window>

@@ -1,4 +1,7 @@
-﻿using System.Text;
+﻿using Newtonsoft.Json;
+using QuikGraph;
+using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -21,14 +24,25 @@ public partial class MainWindow : Window
     const string _uri = "http://localhost:3000/api/graph";
     GraphClientLogic logic = new GraphClientLogic(_uri);
     GraphPL graph = new GraphPL();
+    private NodePositionPool nodePositionPool = new NodePositionPool();
 
     //Работа с визуальной частью
     private NodePL _draggedNode; // Узел, который перемещается
     private Point _offset; // Смещение курсора относительно верхнего левого угла узла
 
+
     public MainWindow()
     {
         InitializeComponent();
+    }
+
+    private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+    {
+        logic.SetGraph(PL_to_BLL_mapper.MapGraph(graph));
+    }
+    private void Exit_Click(object sender, RoutedEventArgs e)
+    {
+        this.Close();
     }
 
     private async void ConnTest(object sender, RoutedEventArgs e)
@@ -42,13 +56,6 @@ public partial class MainWindow : Window
         else SendMessage("Ответ от сервера не получен");
     }
 
-
-
-
-    private void Exit_Click(object sender, RoutedEventArgs e)
-    {
-        this.Close();
-    }
     void SendMessage(string _message)
     {
         if (!string.IsNullOrWhiteSpace(_message))
@@ -67,6 +74,8 @@ public partial class MainWindow : Window
             try
             {
                 graph = BLL_to_PL_mapper.MapGraph(temp);
+                GetSavedNodePositions();
+
                 DataContext = graph;
                 SendMessage("Граф получен");
             }
@@ -84,22 +93,89 @@ public partial class MainWindow : Window
     private async void CreateNewNode(object sender, RoutedEventArgs e)
     {
         SendMessage("Попытка создания нового узла");
-        NodePL ppl = new NodePL("test", 3);
-        Graph temp = await logic.CreateNode(PL_to_BLL_mapper.MapNode(ppl));
-        if (temp != null)
+        var createNodeWindow = new CreateNodeWindow();
+        if (createNodeWindow.ShowDialog() == true)
         {
-            try
+            string nodeName = createNodeWindow.NodeName;
+            int portCount = createNodeWindow.PortCount;
+            string selectedText = createNodeWindow.SelectedText;
+            int number = createNodeWindow.Number;
+
+            var ports = new List<Port>();
+            for (int i = 0; i < portCount; i++)
             {
-                graph = BLL_to_PL_mapper.MapGraph(temp);
-                SendMessage("Узел создан");
+                ports.Add(new Port { IsLeftSidePort = i % 2 != 0 });
             }
-            catch (Exception ex)
+            var newNode = new NodePL(nodeName, ports)
             {
-                SendMessage($"Узел не создан: {ex}");
+                SimpleDataPL = new NodeDataPL
+                {
+                    SomeText = selectedText,
+                    SomeValue = number
+                }
+            };
+            Graph temp = await logic.CreateNode(PL_to_BLL_mapper.MapNode(newNode));
+            if (temp != null)
+            {
+                try
+                {
+                    graph = BLL_to_PL_mapper.MapGraph(temp);
+                    GetSavedNodePositions();
+                    DataContext = graph;
+                    SendMessage("Узел создан");
+                }
+                catch (Exception ex)
+                {
+                    SendMessage($"Узел не создан: {ex}");
+                }
+            }
+            else { SendMessage("Ошибка создания нового узла"); }
+        }
+    }
+
+    private void RefreshNodePositions()
+    {
+        foreach (var node in graph.Vertices)
+        {
+            nodePositionPool.AddOrUpdateNodePosition(node.Id, new Point { X = node.X, Y = node.Y });
+        }
+    }
+
+    private void GetSavedNodePositions()
+    {
+        foreach (var node in graph.Vertices)
+        {
+            Point? pos = nodePositionPool.GetNodePosition(node.Id);
+            if (pos != null)
+            {
+                node.X = pos.Value.X;
+                node.Y = pos.Value.Y;
             }
         }
-        else { SendMessage("Ошибка создания нового узла"); }
     }
+
+
+
+    //private async void CreateNewNode(object sender, RoutedEventArgs e)
+    //{
+    //    SendMessage("Попытка создания нового узла");
+    //    NodePL ppl = new NodePL("test", new List<Port>());
+    //    Graph temp = await logic.CreateNode(PL_to_BLL_mapper.MapNode(ppl));
+    //    if (temp != null)
+    //    {
+    //        try
+    //        {
+    //            graph = BLL_to_PL_mapper.MapGraph(temp);
+    //            DataContext = graph;
+    //            SendMessage("Узел создан");
+    //        }
+    //        catch (Exception ex)
+    //        {
+    //            SendMessage($"Узел не создан: {ex}");
+    //        }
+    //    }
+    //    else { SendMessage("Ошибка создания нового узла"); }
+    //}
 
     private void ItemsControl_PreviewMouseMove(object sender, MouseEventArgs e)
     {
@@ -145,6 +221,7 @@ public partial class MainWindow : Window
 
             // Сбрасываем состояние перемещения
             _draggedNode = null;
+            RefreshNodePositions();
         }
     }
 }

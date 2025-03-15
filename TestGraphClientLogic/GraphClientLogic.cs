@@ -27,7 +27,7 @@ namespace TestGraphClientLogic
             try
             {
                 HttpResponseMessage response = await client.GetAsync($"{serverUrl}/ping");
-               return response.IsSuccessStatusCode;
+                return response.IsSuccessStatusCode;
             }
             catch (Exception)
             {
@@ -50,6 +50,49 @@ namespace TestGraphClientLogic
             {
                 return null;
             }
+        }
+
+        //Отправление модели графа
+        public async Task<bool> SetGraph(Graph _graph)
+        {
+            // Сериализуем объект Graph в JSON
+            string json = JsonConvert.SerializeObject(GraphToGraphDto( _graph, out bool _error), Formatting.Indented);
+            // Создаем контент для отправки
+            StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            // Отправляем POST-запрос
+            HttpResponseMessage response = await client.PostAsync($"{serverUrl}/setgraphstate", content);
+
+            // Проверяем успешность запроса
+            if (response.IsSuccessStatusCode)
+            {
+                Console.WriteLine("Граф успешно отправлен на сервер.");
+                return true;
+            }
+            else
+            {
+                Console.WriteLine("Ошибка при отправке графа: " + response.StatusCode);
+                return false;
+            }
+
+            //if (_graph != null)
+            //{
+            //    GraphDto temp = GraphToGraphDto(_graph, out bool _error);
+            //    string json = JsonConvert.SerializeObject(temp, Formatting.Indented);
+            //    StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
+            //    HttpResponseMessage response = await client.PostAsync($"{serverUrl}/getgraph", content);
+
+            //    Console.WriteLine(response.IsSuccessStatusCode);
+
+            //    if (response.IsSuccessStatusCode)
+            //    {
+            //        return true;
+            //    }
+            //    else return false;
+            //}
+            //else return false;
+
+            return true;
         }
 
         //Создание узла
@@ -167,6 +210,8 @@ namespace TestGraphClientLogic
                         Id = nodeDto.Id,
                         PortsNumber = nodeDto.PortsNumber,
                         NodeName = nodeDto.NodeName,
+                        X = nodeDto.X,
+                        Y = nodeDto.Y,
                         SimpleData = new NodeData(),
                         Ports = nodeDto.Ports.Select(p => new Port
                         {
@@ -198,6 +243,68 @@ namespace TestGraphClientLogic
             {
                 _error = true;
                 throw;
+            }
+        }
+
+        public static string GraphToGraphDto(Graph _graph, out bool _error)
+        {
+            _error = false;
+
+            try
+            {
+                // Создаем DTO для графа
+                var graphDto = new GraphDto
+                {
+                    Vertices = _graph.Vertices.Select(node => new NodeDto
+                    {
+                        Id = node.Id,
+                        PortsNumber = node.PortsNumber,
+                        NodeName = node.NodeName,
+                        X = node.X,
+                        Y = node.Y,
+                        Ports = node.Ports.Select(port => new PortDto
+                        {
+                            Id = port.Id,
+                            LocalId = port.LocalId,
+                            InputPortNumber = port.InputPortNumber,
+                            IsLeftSidePort = port.IsLeftSidePort
+                        }).ToList()
+                    }).ToList(),
+
+                    Edges = _graph.Edges.Select(edge => new EdgeDto
+                    {
+                        Source = new NodeDto
+                        {
+                            Id = edge.Source.Id,
+                            PortsNumber = edge.Source.PortsNumber,
+                            NodeName = edge.Source.NodeName
+                        },
+                        Target = new NodeDto
+                        {
+                            Id = edge.Target.Id,
+                            PortsNumber = edge.Target.PortsNumber,
+                            NodeName = edge.Target.NodeName
+                        }
+                    }).ToList()
+                };
+
+                // Настройки сериализации
+                var settings = new JsonSerializerSettings
+                {
+                    NullValueHandling = NullValueHandling.Ignore, // Игнорировать null-значения
+                    MissingMemberHandling = MissingMemberHandling.Ignore, // Игнорировать отсутствующие свойства
+                    ContractResolver = new CamelCasePropertyNamesContractResolver(), // Использовать camelCase
+                    Formatting = Formatting.Indented // Красивый вывод с отступами
+                };
+
+                // Сериализация в JSON
+                string json = JsonConvert.SerializeObject(graphDto, settings);
+                return json;
+            }
+            catch (Exception ex)
+            {
+                _error = true;
+                throw new Exception("Ошибка при преобразовании графа в JSON", ex);
             }
         }
 
