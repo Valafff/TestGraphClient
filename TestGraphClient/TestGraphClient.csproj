@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <Reference Include="TestGraphClientLogic">
-      <HintPath>..\TestGraphClientLogic\bin\Release\net8.0\TestGraphClientLogic.dll</HintPath>
+      <HintPath>..\TestGraphClientLogic\bin\Debug\net8.0\TestGraphClientLogic.dll</HintPath>
     </Reference>
     <Reference Include="TestGraphModel">
       <HintPath>..\..\TestGraphServer\TestGraphModel\bin\Release\net8.0\TestGraphModel.dll</HintPath>

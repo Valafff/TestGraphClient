@@ -28,7 +28,7 @@
             </MenuItem>
         </Menu>
 
-        <Grid Grid.Row="1" Grid.Column="0">
+        <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
             <!-- Canvas для линий -->
             <Canvas x:Name="GraphCanvas" />
             <!-- Отображение узлов -->
@@ -53,6 +53,8 @@
                             <Border BorderBrush="Black" BorderThickness="2" Background="LightGray" Padding="10" Width="150" Height="100">
                                 <StackPanel>
                                     <TextBlock Text="{Binding NodeNamePL}" FontWeight="Bold" HorizontalAlignment="Center" />
+                                    <TextBlock Text="{Binding SimpleDataPL.SomeText}" FontWeight="Bold" HorizontalAlignment="Center" />
+                                    <TextBlock Text="{Binding SimpleDataPL.SomeValue}" FontWeight="Bold" HorizontalAlignment="Center" />
                                 </StackPanel>
                             </Border>
 

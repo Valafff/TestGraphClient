@@ -19,6 +19,7 @@ namespace TestGraphClient.Mappers
                 GraphName = _graph.GraphName
             };
 
+            //Словарь для хранения  Id узлов
             Dictionary<int, NodePL> _nodeMap = new Dictionary<int, NodePL>();
             foreach (var _node in _graph.Vertices)
             {
@@ -46,7 +47,7 @@ namespace TestGraphClient.Mappers
                 Y = node.Y
             };
 
-            //зашито в конструктор ноды
+            ////зашито в конструктор ноды
             //// Маппирование портов
             //foreach (var _port in node.Ports)
             //{
@@ -82,6 +83,7 @@ namespace TestGraphClient.Mappers
                 InputPortNumber = _port.InputPortNumber,
                 InputNodeName = _port.InputNodeName,
                 IsLeftSidePort = _port.IsLeftSidePort
+
                 ////Координаты в BL не хранятся
                 //X = 0, // Default value, can be adjusted as needed
                 //Y = 0  // Default value, can be adjusted as needed
@@ -148,7 +150,6 @@ namespace TestGraphClient.Mappers
                 Port port = MapPort(portPL);
                 node.Ports.Add(port);
             }
-
             return node;
         }
 

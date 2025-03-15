@@ -74,25 +74,6 @@ namespace TestGraphClientLogic
                 Console.WriteLine("Ошибка при отправке графа: " + response.StatusCode);
                 return false;
             }
-
-            //if (_graph != null)
-            //{
-            //    GraphDto temp = GraphToGraphDto(_graph, out bool _error);
-            //    string json = JsonConvert.SerializeObject(temp, Formatting.Indented);
-            //    StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
-            //    HttpResponseMessage response = await client.PostAsync($"{serverUrl}/getgraph", content);
-
-            //    Console.WriteLine(response.IsSuccessStatusCode);
-
-            //    if (response.IsSuccessStatusCode)
-            //    {
-            //        return true;
-            //    }
-            //    else return false;
-            //}
-            //else return false;
-
-            return true;
         }
 
         //Создание узла
@@ -205,6 +186,7 @@ namespace TestGraphClientLogic
                 // Добавление узлов в граф
                 foreach (var nodeDto in graphDto.Vertices)
                 {
+
                     Node node = new Node
                     {
                         Id = nodeDto.Id,
@@ -212,15 +194,19 @@ namespace TestGraphClientLogic
                         NodeName = nodeDto.NodeName,
                         X = nodeDto.X,
                         Y = nodeDto.Y,
-                        SimpleData = new NodeData(),
+                        SimpleData = new NodeData() { SomeText = nodeDto.SimpleData.SomeText, SomeValue = nodeDto.SimpleData.SomeValue },                        
                         Ports = nodeDto.Ports.Select(p => new Port
                         {
                             Id = p.Id,
                             LocalId = p.LocalId,
                             InputPortNumber = p.InputPortNumber,
                             IsLeftSidePort = p.IsLeftSidePort
-                        }).ToList()
+                        }).ToList()                    
                     };
+                    //NodeData nd = new NodeData();
+                    //nd.SomeText = nodeDto.SimpleData.SomeText;
+                    //nd.SomeValue = nodeDto.SimpleData.SomeValue;
+                    //node.SimpleData = nd;
 
                     _graph.AddVertex(node);
                 }
@@ -262,6 +248,7 @@ namespace TestGraphClientLogic
                         NodeName = node.NodeName,
                         X = node.X,
                         Y = node.Y,
+                        SimpleData = new NodeDataDto() { SomeText = node.SimpleData.SomeText, SomeValue = node.SimpleData.SomeValue},
                         Ports = node.Ports.Select(port => new PortDto
                         {
                             Id = port.Id,
