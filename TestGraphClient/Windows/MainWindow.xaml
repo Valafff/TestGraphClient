@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TestGraphClient.Windows"
         mc:Ignorable="d"
-        Title="Тестовое задание" Height="800" Width="800" Closing="Window_Closing">
+        Title="Тестовое задание" Height="800" Width="1200" Closing="Window_Closing">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="25"/>
@@ -36,14 +36,14 @@
                         <Setter Property="Canvas.Left" Value="{Binding X}" />
                         <Setter Property="Canvas.Top" Value="{Binding Y}" />
                         <EventSetter Event="PreviewMouseLeftButtonDown" Handler="Node_PreviewMouseLeftButtonDown" />
-                        <EventSetter Event="PreviewMouseLeftButtonUp" Handler="Node_PreviewMouseLeftButtonUp" />
+                        <EventSetter Event="PreviewMouseLeftButtonUp" Handler="NodeEdit_PreviewMouseLeftButtonUp" />
                     </Style>
                 </ItemsControl.ItemContainerStyle>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Grid>
                             <!-- Прямоугольник узла -->
-                            <Border BorderBrush="Black" BorderThickness="2" Background="LightGray" Padding="20" Width="180" Height="110" PreviewMouseLeftButtonUp="Node_PreviewMouseLeftButtonUp">
+                            <Border BorderBrush="Black" BorderThickness="2" Background="LightGray" Padding="20" Width="180" Height="110" PreviewMouseLeftButtonUp="NodeEdit_PreviewMouseLeftButtonUp">
                                 <StackPanel>
                                     <TextBlock Text="{Binding NodeNamePL}" FontWeight="Bold" HorizontalAlignment="Center" />
                                     <TextBlock Text="{Binding SimpleDataPL.SomeText}" FontWeight="Bold" HorizontalAlignment="Center" />

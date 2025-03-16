@@ -77,7 +77,7 @@ public partial class MainWindow : Window
     {
         if (!string.IsNullOrWhiteSpace(_message))
         {
-            ConsoleListBox.Items.Add(DateTime.Now.ToString("hh:mm:ss") + "\t" + _message);
+            ConsoleListBox.Items.Add(DateTime.Now.ToString("hh:mm:ss") + ": " + _message);
             ConsoleScrollViewer.ScrollToEnd();
         }
     }
@@ -121,7 +121,7 @@ public partial class MainWindow : Window
             var ports = new List<Port>();
             for (int i = 0; i < portCount; i++)
             {
-                ports.Add(new Port { IsLeftSidePort = i % 2 != 0 });
+                ports.Add(new Port { IsLeftSidePort = i % 2 != 0, LocalId = i });
             }
             var newNode = new NodePL(nodeName, ports)
             {
@@ -150,6 +150,106 @@ public partial class MainWindow : Window
         }
     }
 
+    //Создание, редактирование ребра
+    private async void GraphCanvas_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (isDragging)
+        {
+            // Отписываемся от событий мыши
+            GraphCanvas.MouseMove -= GraphCanvas_MouseMove;
+            GraphCanvas.MouseLeftButtonUp -= GraphCanvas_MouseLeftButtonUp;
+
+            // Освобождаем мышь
+            GraphCanvas.ReleaseMouseCapture();
+            isDragging = false;
+
+            //Запись ребра
+            if (hoverPort != null)
+            {
+                tempTargetPort = hoverPort;
+
+                if (tempSourcePort != null && tempTargetPort != null)
+                {
+                    SendMessage("Попытка создания ребра");
+                    EdgePL tempEdge = new EdgePL(tempSourcePort.NodeOwner, tempTargetPort.NodeOwner, tempSourcePort, tempTargetPort);
+                    Graph temp = await logic.CreateOrEditEdge(PL_to_BLL_mapper.MapEdge(tempEdge.Id, tempEdge, tempSourcePort.NodeOwner, tempTargetPort.NodeOwner));
+                    if (temp != null)
+                    {
+                        try
+                        {
+                            graph = BLL_to_PL_mapper.MapGraph(temp);
+                            GetSavedNodePositions();
+                            DataContext = graph;
+                            var te = graph.Edges.FirstOrDefault(e => e.Id == graph.Edges.Max(e => e.Id));
+                            SendMessage($"Ребро создано! Id ребра: {te.Id}. Узел источник: {te.Source.NodeNamePL}. Локальный Id порта источника: {te.PortSource.LocalId}." +
+                                $" Узел приемник: {te.Target.NodeNamePL}. Локальный Id порта приемника: {te.PortTarget.LocalId}");
+                            Line tempLine = new Line
+                            {
+                                Stroke = Brushes.Black,
+                                StrokeThickness = 3,
+                                X1 = tempSourcePort.NodeOwner.X + tempSourcePort.X,
+                                Y1 = tempSourcePort.NodeOwner.Y + tempSourcePort.Y + 5,
+                                X2 = tempTargetPort.NodeOwner.X + tempTargetPort.X,
+                                Y2 = tempTargetPort.NodeOwner.Y + tempTargetPort.Y + 5
+                            };
+                            GraphCanvas.Children.Remove(_tempLine);
+                            GraphCanvas.Children.Add(tempLine);
+                            DeleteAllLines();
+                            Line_Inicialization();
+                        }
+                        catch (Exception ex)
+                        {
+                            GraphCanvas.Children.Remove(_tempLine);
+                            SendMessage($"Ребро не создано: {ex}");
+                        }
+                    }
+                    else { SendMessage("Ошибка создания ребра"); GraphCanvas.Children.Remove(_tempLine); }
+                }
+            }
+
+
+            // Сбрасываем порт источник и порт приемник
+            tempSourcePort = null;
+            tempTargetPort = null;
+        }
+    }
+
+    //Удаление ребра
+    private async void Edge_Delete(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Delete && _tempLine != null)
+        {
+            //Удаление ребра
+            EdgePL targetEdge = graph.Edges.FirstOrDefault(e => Math.Round(e.Source.X + e.PortSource.X) == Math.Round(_tempLine.X1)
+            && Math.Round(e.Source.Y + e.PortSource.Y + 5) == Math.Round(_tempLine.Y1)
+            && Math.Round(e.Target.X + e.PortTarget.X) == Math.Round(_tempLine.X2)
+            && Math.Round(e.Target.Y + e.PortTarget.Y + 5) == Math.Round(_tempLine.Y2));
+
+            if (targetEdge != null)
+            {
+                Graph temp = await logic.DeleteEdge(targetEdge.Id);
+                if (temp != null)
+                {
+                    try
+                    {
+                        graph = BLL_to_PL_mapper.MapGraph(temp);
+                        GetSavedNodePositions();
+                        DataContext = graph;
+                        SendMessage("Ребро удалено");
+                    }
+                    catch (Exception ex)
+                    {
+                        SendMessage($"Ребро не удалено: {ex}");
+                    }
+                }
+                else { SendMessage("Ошибка удаления ребра"); }
+
+                //Удаление линии канвы
+                GraphCanvas.Children.Remove(_tempLine);
+                _tempLine = null;
+            }
+        }
+    }
     private void ItemsControl_PreviewMouseMove(object sender, MouseEventArgs e)
     {
         if (_draggedNode != null && e.LeftButton == MouseButtonState.Pressed)
@@ -184,7 +284,7 @@ public partial class MainWindow : Window
         {
             // Выбираем пор-источник
             tempSourcePort = port;
-            SendMessage($"Выбран первый порт: Узел-владелец: {nodeOwner.NodeNamePL}, Локальный ID порта: {port.LocalId}");
+            SendMessage($"Выбран порт: Узел-владелец: {nodeOwner.NodeNamePL}, Локальный ID порта: {port.LocalId}");
 
             _tempLine = new Line
             {
@@ -213,71 +313,6 @@ public partial class MainWindow : Window
             // Обновляем координаты временной линии
             _tempLine.X2 = position.X;
             _tempLine.Y2 = position.Y;
-        }
-    }
-
-    //Установка второго порта - порта назначения осуществляется тут
-    private async void GraphCanvas_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-    {
-        if (isDragging)
-        {
-            // Отписываемся от событий мыши
-            GraphCanvas.MouseMove -= GraphCanvas_MouseMove;
-            GraphCanvas.MouseLeftButtonUp -= GraphCanvas_MouseLeftButtonUp;
-
-            // Удаляем временную линию
-
-
-            // Освобождаем мышь
-            GraphCanvas.ReleaseMouseCapture();
-            isDragging = false;
-
-            //Запись ребра
-            if (hoverPort != null)
-            {
-                tempTargetPort = hoverPort;
-
-                if (tempSourcePort != null && tempTargetPort != null)
-                {
-                    SendMessage("Попытка создания ребра");
-                    EdgePL tempEdge = new EdgePL(tempSourcePort.NodeOwner, tempTargetPort.NodeOwner, tempSourcePort, tempTargetPort);
-                    Graph temp = await logic.CreateOrEditEdge(PL_to_BLL_mapper.MapEdge(tempEdge.Id, tempEdge, tempSourcePort.NodeOwner, tempTargetPort.NodeOwner));
-                    if (temp != null)
-                    {
-                        try
-                        {
-                            graph = BLL_to_PL_mapper.MapGraph(temp);
-                            GetSavedNodePositions();
-                            DataContext = graph;
-                            SendMessage("Ребро создано");
-                            Line tempLine = new Line
-                            {
-                                Stroke = Brushes.Black,
-                                StrokeThickness = 3,
-                                X1 = tempSourcePort.NodeOwner.X + tempSourcePort.X,
-                                Y1 = tempSourcePort.NodeOwner.Y + tempSourcePort.Y + 5,
-                                X2 = tempTargetPort.NodeOwner.X + tempTargetPort.X,
-                                Y2 = tempTargetPort.NodeOwner.Y + tempTargetPort.Y + 5
-                            };
-                            GraphCanvas.Children.Remove(_tempLine);
-                            GraphCanvas.Children.Add(tempLine);
-                            DeleteAllLines();
-                            Line_Inicialization();
-                        }
-                        catch (Exception ex)
-                        {
-                            GraphCanvas.Children.Remove(_tempLine);
-                            SendMessage($"Ребро не создано: {ex}");
-                        }
-                    }
-                    else { SendMessage("Ошибка создания ребра"); GraphCanvas.Children.Remove(_tempLine); }
-                }
-            }
-
-
-            // Сбрасываем состояние
-            tempSourcePort = null;
-            tempTargetPort = null;
         }
     }
 
@@ -321,7 +356,8 @@ public partial class MainWindow : Window
         }
     }
 
-    private async void Node_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    //Редактирование Узла и 
+    private async void NodeEdit_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
         // Двойной клик - редактирование ноды
         DateTime currentTime = DateTime.Now;
@@ -359,7 +395,6 @@ public partial class MainWindow : Window
             }
             else { SendMessage("Узел не редактировался"); }
         }
-
 
         if (_draggedNode != null)
         {
@@ -462,42 +497,7 @@ public partial class MainWindow : Window
         return Math.Sqrt(Math.Pow(p1.X - p2.X, 2) + Math.Pow(p1.Y - p2.Y, 2));
     }
 
-    //Удаление ребра
-    private async void Edge_Delete(object sender, KeyEventArgs e)
-    {
-        if (e.Key == Key.Delete && _tempLine != null)
-        {
-            //Удаление ребра
-            EdgePL targetEdge = graph.Edges.FirstOrDefault(e => Math.Round(e.Source.X + e.PortSource.X) == Math.Round(_tempLine.X1)
-            &&  Math.Round(e.Source.Y + e.PortSource.Y+5) == Math.Round(_tempLine.Y1)
-            && Math.Round(e.Target.X + e.PortTarget.X) == Math.Round( _tempLine.X2)
-            && Math.Round(e.Target.Y + e.PortTarget.Y +5 ) == Math.Round( _tempLine.Y2));
 
-            if (targetEdge != null)
-            {
-                Graph temp = await logic.DeleteEdge(targetEdge.Id);
-                if (temp != null)
-                {
-                    try
-                    {
-                        graph = BLL_to_PL_mapper.MapGraph(temp);
-                        GetSavedNodePositions();
-                        DataContext = graph;
-                        SendMessage("Ребро удалено");
-                    }
-                    catch (Exception ex)
-                    {
-                        SendMessage($"Ребро не удалено: {ex}");
-                    }
-                }
-                else { SendMessage("Ошибка удаления ребра"); }
-
-                //Удаление линии канвы
-                GraphCanvas.Children.Remove(_tempLine);
-                _tempLine = null;
-            }
-        }
-    }
 
     private void Line_Inicialization()
     {
