@@ -145,6 +145,11 @@ namespace TestGraphClient.Mappers
             return new Edge(id, MapNode(_source), MapNode(_target), MapPort(_edgePL.PortSource), MapPort(_edgePL.PortTarget));
         }
 
+        public static Edge MapEdge(EdgePL _edgePL)
+        {
+            return new Edge(_edgePL.Id, MapNode(_edgePL.Source), MapNode(_edgePL.Target), MapPort(_edgePL.PortSource), MapPort(_edgePL.PortTarget));
+        }
+
         public static Edge MapEdgeDict(EdgePL _edgePL, Dictionary<int, Node> _nodeMap)
         {
             return new Edge(_edgePL.Id, _nodeMap[_edgePL.Source.Id], _nodeMap[_edgePL.Target.Id], MapPort(_edgePL.PortSource), MapPort(_edgePL.PortTarget));

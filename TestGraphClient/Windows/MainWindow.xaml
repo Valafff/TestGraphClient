@@ -12,11 +12,7 @@
             <RowDefinition/>
             <RowDefinition Height="200"/>
         </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="67*"/>
-            <ColumnDefinition Width="33*"/>
-        </Grid.ColumnDefinitions>
-        <Menu Grid.Row="0" Grid.ColumnSpan="2">
+        <Menu Grid.Row="0">
             <MenuItem Header="Работа с графом">
                 <MenuItem Header="Тест подключения" Click="ConnTest"/>
                 <MenuItem Header="Получить граф" Click ="GetGraph"/>
@@ -27,7 +23,7 @@
             </MenuItem>
         </Menu>
 
-        <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
+        <Grid Grid.Row="1" Grid.Column="0">
             <!-- Canvas для линий -->
             <Canvas x:Name="GraphCanvas" />
             <!-- Отображение узлов -->

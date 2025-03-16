@@ -36,7 +36,6 @@ public partial class MainWindow : Window
     private Line _tempLine;
     private bool isDragging = false; // Флаг для отслеживания перетаскивания
     private bool isDraggingStartPoint = false; // Флаг для определения, какой конец линии перетаскивается
-    //private Dictionary<EdgePL, Line> EdgeLines = new Dictionary<EdgePL, Line>();
 
     //Работа с визуальной частью
     private NodePL _draggedNode; // Узел, который перемещается
@@ -51,6 +50,7 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         GetGraph(null, null);
+        KeyDown += Edge_Delete;
     }
 
     private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -91,6 +91,7 @@ public partial class MainWindow : Window
             try
             {
                 graph = BLL_to_PL_mapper.MapGraph(temp);
+                DeleteAllLines();
                 Line_Inicialization();
                 DataContext = graph;
                 SendMessage("Граф получен");
@@ -161,11 +162,7 @@ public partial class MainWindow : Window
             _draggedNode.X = position.X - _offset.X;
             _draggedNode.Y = position.Y - _offset.Y;
 
-            var linesToRemove = GraphCanvas.Children.OfType<Line>().ToList();
-            foreach (var line in linesToRemove)
-            {
-                GraphCanvas.Children.Remove(line);
-            }
+            DeleteAllLines();
             Line_Inicialization();
         }
 
@@ -264,6 +261,8 @@ public partial class MainWindow : Window
                             };
                             GraphCanvas.Children.Remove(_tempLine);
                             GraphCanvas.Children.Add(tempLine);
+                            DeleteAllLines();
+                            Line_Inicialization();
                         }
                         catch (Exception ex)
                         {
@@ -463,6 +462,43 @@ public partial class MainWindow : Window
         return Math.Sqrt(Math.Pow(p1.X - p2.X, 2) + Math.Pow(p1.Y - p2.Y, 2));
     }
 
+    //Удаление ребра
+    private async void Edge_Delete(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Delete && _tempLine != null)
+        {
+            //Удаление ребра
+            EdgePL targetEdge = graph.Edges.FirstOrDefault(e => Math.Round(e.Source.X + e.PortSource.X) == Math.Round(_tempLine.X1)
+            &&  Math.Round(e.Source.Y + e.PortSource.Y+5) == Math.Round(_tempLine.Y1)
+            && Math.Round(e.Target.X + e.PortTarget.X) == Math.Round( _tempLine.X2)
+            && Math.Round(e.Target.Y + e.PortTarget.Y +5 ) == Math.Round( _tempLine.Y2));
+
+            if (targetEdge != null)
+            {
+                Graph temp = await logic.DeleteEdge(targetEdge.Id);
+                if (temp != null)
+                {
+                    try
+                    {
+                        graph = BLL_to_PL_mapper.MapGraph(temp);
+                        GetSavedNodePositions();
+                        DataContext = graph;
+                        SendMessage("Ребро удалено");
+                    }
+                    catch (Exception ex)
+                    {
+                        SendMessage($"Ребро не удалено: {ex}");
+                    }
+                }
+                else { SendMessage("Ошибка удаления ребра"); }
+
+                //Удаление линии канвы
+                GraphCanvas.Children.Remove(_tempLine);
+                _tempLine = null;
+            }
+        }
+    }
+
     private void Line_Inicialization()
     {
         foreach (var edge in graph.Edges)
@@ -488,13 +524,24 @@ public partial class MainWindow : Window
             Line tempLine = new Line
             {
                 Stroke = Brushes.Black,
-                StrokeThickness = 3,
+                StrokeThickness = 4,
                 X1 = sourcePoint.X + edge.PortSource.X,
                 Y1 = sourcePoint.Y + edge.PortSource.Y + 5,
                 X2 = targetPoint.X + edge.PortTarget.X,
                 Y2 = targetPoint.Y + edge.PortTarget.Y + 5
             };
+            tempLine.MouseDown += Line_MouseDown;
+            tempLine.MouseUp += Line_MouseUp;
             GraphCanvas.Children.Add(tempLine);
+        }
+    }
+
+    private void DeleteAllLines()
+    {
+        var linesToRemove = GraphCanvas.Children.OfType<Line>().ToList();
+        foreach (var line in linesToRemove)
+        {
+            GraphCanvas.Children.Remove(line);
         }
     }
 }
