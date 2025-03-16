@@ -86,7 +86,7 @@
                                 </ItemsControl.ItemsPanel>
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Ellipse Width="10" Height="10" Fill="Red" MouseLeftButtonDown="Port_MouseLeftButtonDown"/>
+                                        <Ellipse Width="10" Height="10" Fill="Blue" MouseLeftButtonDown="Port_MouseLeftButtonDown"/>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                                 <ItemsControl.ItemContainerStyle>
