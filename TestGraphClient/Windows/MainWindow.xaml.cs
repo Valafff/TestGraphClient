@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using QuikGraph;
+using System;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -29,6 +30,10 @@ public partial class MainWindow : Window
     //Работа с визуальной частью
     private NodePL _draggedNode; // Узел, который перемещается
     private Point _offset; // Смещение курсора относительно верхнего левого угла узла
+
+    //Для обработки двойного клика по ноде
+    DateTime _lastClickTime;
+    const int DoubleClickTimeout = 500;
 
 
     public MainWindow()
@@ -98,7 +103,7 @@ public partial class MainWindow : Window
         {
             string nodeName = createNodeWindow.NodeName;
             int portCount = createNodeWindow.PortCount;
-            string selectedText = createNodeWindow.SelectedText;
+            string selectedText = createNodeWindow.SomeText;
             int number = createNodeWindow.Number;
 
             var ports = new List<Port>();
@@ -173,9 +178,13 @@ public partial class MainWindow : Window
     {
 
     }
+
     private void Node_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        // Получаем узел, на который нажали
+
+
+
+        //Нода, на которую нажали
         var contentPresenter = sender as ContentPresenter;
         _draggedNode = contentPresenter?.DataContext as NodePL;
 
@@ -189,17 +198,58 @@ public partial class MainWindow : Window
             contentPresenter.CaptureMouse();
         }
     }
-    private void Node_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+
+    private async void Node_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
+        // Двойной клик - редактирование ноды
+        DateTime currentTime = DateTime.Now;
+        if ((currentTime - _lastClickTime).TotalMilliseconds <= DoubleClickTimeout)
+        {
+            var contentPresenter = sender as ContentPresenter;
+            var node = contentPresenter?.DataContext as NodePL;
+            if (node == null) return;
+
+            contentPresenter?.ReleaseMouseCapture();
+            _draggedNode = null;
+            RefreshNodePositions();
+
+            var editNodeWindow = new EditNodeWindow(node.NodeNamePL, node.SimpleDataPL.SomeText, node.SimpleDataPL.SomeValue);
+            if (editNodeWindow.ShowDialog() == true)
+            {
+                node.NodeNamePL = editNodeWindow.NodeName;
+                node.SimpleDataPL.SomeText = editNodeWindow.SomeText;
+                node.SimpleDataPL.SomeValue = editNodeWindow.Number;
+            }
+            Graph temp = await logic.EditNode(PL_to_BLL_mapper.MapNode(node));
+            if (temp != null)
+            {
+                try
+                {
+                    graph = BLL_to_PL_mapper.MapGraph(temp);
+                    GetSavedNodePositions();
+                    DataContext = graph;
+                    SendMessage("Узел отредактирован");
+                }
+                catch (Exception ex)
+                {
+                    SendMessage($"Узел не отредактирован: {ex}");
+                }
+            }
+            else { SendMessage("Ошибка редактирования узла"); }
+        }
+
+
         if (_draggedNode != null)
         {
             // Освобождаем мышь
             var contentPresenter = sender as ContentPresenter;
             contentPresenter?.ReleaseMouseCapture();
 
-            // Сбрасываем состояние перемещения
+            // Сброс состояние перемещения
             _draggedNode = null;
             RefreshNodePositions();
         }
+        //Время последнего клика
+        _lastClickTime = DateTime.Now;
     }
 }

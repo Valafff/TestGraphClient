@@ -1,43 +1,32 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace TestGraphClient.Windows
 {
-    public partial class CreateNodeWindow : Window
+    public partial class EditNodeWindow : Window
     {
         public string NodeName { get; private set; }
-        public int PortCount { get; private set; }
         public string SomeText { get; private set; }
         public int Number { get; private set; }
 
-        public CreateNodeWindow()
+        public EditNodeWindow(string nodeName, string selectedText, int number)
         {
             InitializeComponent();
+
+            // Инициализация полей начальными значениями
+            NodeNameTextBox.Text = nodeName;
+            TextComboBox.SelectedItem = TextComboBox.Items.Cast<ComboBoxItem>()
+                .FirstOrDefault(item => item.Content.ToString() == selectedText);
+            NumberTextBox.Text = number.ToString();
         }
 
-        private void CreateButton_Click(object sender, RoutedEventArgs e)
+        private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
             // Валидация введенных данных
             if (string.IsNullOrWhiteSpace(NodeNameTextBox.Text))
             {
                 MessageBox.Show("Введите название узла.");
-                return;
-            }
-
-            if (!int.TryParse(PortCountTextBox.Text, out int portCount) || portCount < 0 || portCount > 10)
-            {
-                MessageBox.Show("Количество портов должно быть числом от 0 до 10.");
                 return;
             }
 
@@ -53,14 +42,13 @@ namespace TestGraphClient.Windows
                 return;
             }
 
+            // Сохраняем отредактированные данные
             NodeName = NodeNameTextBox.Text;
-            PortCount = portCount;
             SomeText = (TextComboBox.SelectedItem as ComboBoxItem)?.Content.ToString();
             Number = number;
 
-            //Условие записи данных в основную форму
+            // Закрываем окно с результатом DialogResult = true
             DialogResult = true;
-
             Close();
         }
     }

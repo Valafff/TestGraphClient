@@ -21,7 +21,6 @@
                 <MenuItem Header="Тест подключения" Click="ConnTest"/>
                 <MenuItem Header="Получить граф" Click ="GetGraph"/>
                 <MenuItem Header="Создать новый узел" Click="CreateNewNode"/>
-                <MenuItem Header="Редактировать узел"/>
                 <MenuItem Header="Создать ребро"/>
                 <MenuItem Header="Удалить ребро"/>
                 <MenuItem Header="Выход" Name="Exit" Click="Exit_Click"/>
@@ -50,7 +49,7 @@
                     <DataTemplate>
                         <Grid>
                             <!-- Прямоугольник узла -->
-                            <Border BorderBrush="Black" BorderThickness="2" Background="LightGray" Padding="10" Width="180" Height="100">
+                            <Border BorderBrush="Black" BorderThickness="2" Background="LightGray" Padding="10" Width="180" Height="110" PreviewMouseLeftButtonUp="Node_PreviewMouseLeftButtonUp">
                                 <StackPanel>
                                     <TextBlock Text="{Binding NodeNamePL}" FontWeight="Bold" HorizontalAlignment="Center" />
                                     <TextBlock Text="{Binding SimpleDataPL.SomeText}" FontWeight="Bold" HorizontalAlignment="Center" />
