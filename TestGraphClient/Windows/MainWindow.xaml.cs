@@ -1,23 +1,12 @@
-﻿using Newtonsoft.Json;
-using QuikGraph;
-using System;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 using TestGraphClient.Mappers;
 using TestGraphClient.Models;
 using TestGraphClientLogic;
 using TestGraphModel;
-using static QuikGraph.Algorithms.Assignment.HungarianAlgorithm;
 
 namespace TestGraphClient.Windows;
 
@@ -25,8 +14,10 @@ public partial class MainWindow : Window
 {
     const string _uri = "http://localhost:3000/api/graph";
     GraphClientLogic logic = new GraphClientLogic(_uri);
+
     GraphPL graph = new GraphPL();
-    //Отслеживает координаты узлов
+
+    //ObjectPool(Подслушано на RadioDotNet, вероятно излишне, просто попытка реализовать) Отслеживает координаты узлов - при обновлении графа возвращает актуальные координаты узлам
     private NodePositionPool nodePositionPool = new NodePositionPool();
 
     //Работа с ребрами
@@ -121,7 +112,7 @@ public partial class MainWindow : Window
             var ports = new List<Port>();
             for (int i = 0; i < portCount; i++)
             {
-                ports.Add(new Port { IsLeftSidePort = i % 2 != 0, LocalId = i });
+                ports.Add(new Port { IsLeftSidePort = i % 2 != 0, LocalId = i+1 });
             }
             var newNode = new NodePL(nodeName, ports)
             {
@@ -170,6 +161,14 @@ public partial class MainWindow : Window
 
                 if (tempSourcePort != null && tempTargetPort != null)
                 {
+                    var edg = graph.Edges.FirstOrDefault(e => e.PortSource.Id == tempSourcePort.Id);
+                    if (edg != null)
+                    {
+                        tempSourcePort.InputPortNumber = edg.PortSource.InputPortNumber;
+                        tempSourcePort.InputNodeName = edg.PortSource.InputNodeName;
+                        tempTargetPort.InputPortNumber = edg.PortTarget.InputPortNumber;
+                        tempTargetPort.InputNodeName = edg.PortTarget.InputNodeName;
+                    }
                     SendMessage("Попытка создания ребра");
                     EdgePL tempEdge = new EdgePL(tempSourcePort.NodeOwner, tempTargetPort.NodeOwner, tempSourcePort, tempTargetPort);
                     Graph temp = await logic.CreateOrEditEdge(PL_to_BLL_mapper.MapEdge(tempEdge.Id, tempEdge, tempSourcePort.NodeOwner, tempTargetPort.NodeOwner));
@@ -356,7 +355,7 @@ public partial class MainWindow : Window
         }
     }
 
-    //Редактирование Узла и 
+    //Редактирование Узла
     private async void NodeEdit_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
         // Двойной клик - редактирование ноды
@@ -402,7 +401,7 @@ public partial class MainWindow : Window
             var contentPresenter = sender as ContentPresenter;
             contentPresenter?.ReleaseMouseCapture();
 
-            // Сброс состояние перемещения
+            // Сброс состояния перемещения
             _draggedNode = null;
             RefreshNodePositions();
         }
@@ -443,39 +442,7 @@ public partial class MainWindow : Window
         if (_tempLine != null)
         {
             _tempLine.Stroke = Brushes.Red;
-
-            // Определяем, какой конец линии был нажат
-            Point mousePosition = e.GetPosition(GraphCanvas);
-            double startDistance = Distance(mousePosition, new Point(_tempLine.X1, _tempLine.Y1));
-            double endDistance = Distance(mousePosition, new Point(_tempLine.X2, _tempLine.Y2));
-
-            // Если расстояние до начальной точки меньше, перетаскиваем её
-            isDraggingStartPoint = startDistance < endDistance;
-            isDragging = true; // Начинаем перетаскивание
-
-            // Захватываем мышь, чтобы события MouseMove обрабатывались даже за пределами линии
             _tempLine.CaptureMouse();
-        }
-    }
-
-    private void Line_MouseMove(object sender, MouseEventArgs e)
-    {
-        if (isDragging && _tempLine != null)
-        {
-            // Получаем текущие координаты курсора
-            Point mousePosition = e.GetPosition(GraphCanvas);
-
-            // Обновляем координаты выбранного конца линии
-            if (isDraggingStartPoint)
-            {
-                _tempLine.X1 = mousePosition.X;
-                _tempLine.Y1 = mousePosition.Y;
-            }
-            else
-            {
-                _tempLine.X2 = mousePosition.X;
-                _tempLine.Y2 = mousePosition.Y;
-            }
         }
     }
 
@@ -491,14 +458,6 @@ public partial class MainWindow : Window
         }
     }
 
-    // Вспомогательная функция для вычисления расстояния между двумя точками
-    private double Distance(Point p1, Point p2)
-    {
-        return Math.Sqrt(Math.Pow(p1.X - p2.X, 2) + Math.Pow(p1.Y - p2.Y, 2));
-    }
-
-
-
     private void Line_Inicialization()
     {
         foreach (var edge in graph.Edges)
@@ -509,17 +468,6 @@ public partial class MainWindow : Window
             Point targetPoint;
             targetPoint.X = edge.Target.X;
             targetPoint.Y = edge.Target.Y;
-
-            //Line tempLine = new Line
-            //{
-            //    Stroke = Brushes.Black,
-            //    StrokeThickness = 3,
-            //    X1 = sourcePoint.X + (edge.PortSource.IsLeftSidePort ? 0 : 180),
-            //    Y1 = sourcePoint.Y + (edge.PortSource.LocalId + 1) * 20 + 15,
-            //    X2 = targetPoint.X + (edge.PortTarget.IsLeftSidePort ? 0 : 180),
-            //    Y2 = targetPoint.Y + (edge.PortTarget.LocalId + 1) * 20 + 15,
-            //};
-            //GraphCanvas.Children.Add(tempLine);
 
             Line tempLine = new Line
             {

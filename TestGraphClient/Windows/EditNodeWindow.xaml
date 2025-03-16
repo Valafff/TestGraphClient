@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TestGraphClient.Windows"
         mc:Ignorable="d"
-        Title="Редактирование узла" Height="300" Width="400">
+        Title="Редактирование узла" Height="250" Width="400">
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />

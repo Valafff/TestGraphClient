@@ -138,7 +138,11 @@ namespace TestGraphClientLogic
                     X_source = _edge.PortSource.X,
                     Y_source = _edge.PortSource.Y,
                     X_target = _edge.PortTarget.X,
-                    Y_target = _edge.PortTarget.Y     
+                    Y_target = _edge.PortTarget.Y,
+                    InputToSourcePort = _edge.PortSource.InputNodeName,
+                    InputToTargetPort = _edge.PortTarget.InputNodeName,
+                    InputToSourceNumber = _edge.PortSource.InputPortNumber,
+                    InputToTargetNumber = _edge.PortTarget.InputPortNumber     
                 };
 
                 string json = JsonConvert.SerializeObject(edge);
@@ -200,6 +204,7 @@ namespace TestGraphClientLogic
                             Id = p.Id,
                             LocalId = p.LocalId,
                             InputPortNumber = p.InputPortNumber,
+                            InputNodeName = p.InputNodeName,
                             IsLeftSidePort = p.IsLeftSidePort,
                             X = p.X,
                             Y = p.Y

@@ -46,8 +46,6 @@ namespace TestGraphClient.Mappers
                 Id = node.Id,
                 PortsNumber = node.PortsNumber,
                 SimpleDataPL = MapNodeData(node.SimpleData),
-                //X = node.X,
-                //Y = node.Y
                 
             };
 
