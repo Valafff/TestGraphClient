@@ -109,13 +109,6 @@ namespace TestGraphClientLogic
             Node temp = graph.Vertices.FirstOrDefault(n => n.Id == _newNode.Id);
             if (temp == null) return null;
 
-            //JsonSerializerOptions options = new JsonSerializerOptions
-            //{
-            //    PropertyNameCaseInsensitive = true
-            //};
-
-            //string json = JsonSerializer.Serialize(_newNode, options);
-
             string json = JsonConvert.SerializeObject(_newNode, Formatting.Indented);
             StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
@@ -219,10 +212,28 @@ namespace TestGraphClientLogic
                 {
                     var sourceNode = _graph.Vertices.FirstOrDefault(n => n.Id == edgeDto.Source.Id);
                     var targetNode = _graph.Vertices.FirstOrDefault(n => n.Id == edgeDto.Target.Id);
-
-                    if (sourceNode != null && targetNode != null)
+                    var sourcePortDto = (graphDto.Edges.FirstOrDefault(p => p.PortSource.Id == edgeDto.PortSource.Id)).PortSource;
+                    var targetPortDto = (graphDto.Edges.FirstOrDefault(p => p.PortTarget.Id == edgeDto.PortTarget.Id)).PortTarget;
+                    Port sourcePort = new Port()
                     {
-                        var edge = new Edge(sourceNode, targetNode);
+                        Id = sourcePortDto.Id,
+                        LocalId = sourcePortDto.LocalId,
+                        InputPortNumber = sourcePortDto.InputPortNumber,
+                        InputNodeName = sourcePortDto.InputNodeName,
+                        IsLeftSidePort = sourcePortDto.IsLeftSidePort
+                    };
+                    Port targetPort = new Port()
+                    {
+                        Id = targetPortDto.Id,
+                        LocalId = targetPortDto.LocalId,
+                        InputPortNumber = targetPortDto.InputPortNumber,
+                        InputNodeName = targetPortDto.InputNodeName,
+                        IsLeftSidePort = targetPortDto.IsLeftSidePort
+                    };
+
+                    if (sourceNode != null && targetNode != null && sourcePort != null && targetPort != null)
+                    {
+                        var edge = new Edge(edgeDto.Id, sourceNode, targetNode, sourcePort, targetPort);
                         _graph.AddEdge(edge);
                     }
                 }
@@ -274,6 +285,22 @@ namespace TestGraphClientLogic
                             Id = edge.Target.Id,
                             PortsNumber = edge.Target.PortsNumber,
                             NodeName = edge.Target.NodeName
+                        },
+                        PortSource = new PortDto
+                        {
+                            Id = edge.PortSource.Id,
+                            LocalId =edge.PortSource.LocalId,
+                            InputPortNumber = edge.PortSource.InputPortNumber,
+                            InputNodeName = edge.PortSource.InputNodeName,
+                            IsLeftSidePort = edge.PortSource.IsLeftSidePort
+                        },
+                        PortTarget = new PortDto
+                        {
+                            Id = edge.PortTarget.Id,
+                            LocalId = edge.PortTarget.LocalId,
+                            InputPortNumber = edge.PortTarget.InputPortNumber,
+                            InputNodeName = edge.PortTarget.InputNodeName,
+                            IsLeftSidePort = edge.PortTarget.IsLeftSidePort
                         }
                     }).ToList()
                 };

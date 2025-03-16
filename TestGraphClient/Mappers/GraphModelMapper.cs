@@ -17,6 +17,7 @@ namespace TestGraphClient.Mappers
             {
                 Id = _graph.Id,
                 GraphName = _graph.GraphName
+
             };
 
             //Словарь для хранения  Id узлов
@@ -33,6 +34,7 @@ namespace TestGraphClient.Mappers
                 EdgePL edgePL = MapEdge(_edge, _nodeMap);
                 graphPL.AddEdge(edgePL);
             }
+            //graphPL.NodeMap = _nodeMap;
             return graphPL;
         }
 
@@ -100,9 +102,20 @@ namespace TestGraphClient.Mappers
                 graph.AddVertex(node);
             }
 
+            //foreach (var edgePL in _graphPL.Edges)
+            //{
+            //    //EdgePL edgePL = MapEdge(_edge, _nodeMap);
+            //    //EdgePL(_nodeMap[_edge.Source.Id], _nodeMap[_edge.Target.Id]);
+
+            //    Edge edge = MapEdge(edgePL.Id, edgePL, nodeMap[edge.Source.Id], _graphPL.Vertices.FirstOrDefault(e => e.Id == edgePL.Target.Id));
+            //    //Edge edge = MapEdge(edgePL.Id, edgePL, _graphPL.Vertices.FirstOrDefault(e => e.Id == edgePL.Source.Id), _graphPL.Vertices.FirstOrDefault(e => e.Id == edgePL.Target.Id));
+            //    graph.AddEdge(edge);
+            //}
+  
+
             foreach (var edgePL in _graphPL.Edges)
             {
-                Edge edge = MapEdge(edgePL, nodeMap);
+                Edge edge = MapEdgeDict(edgePL, nodeMap);
                 graph.AddEdge(edge);
             }
 
@@ -135,15 +148,25 @@ namespace TestGraphClient.Mappers
             return node;
         }
 
-        public static Edge MapEdge(EdgePL _edgePL, Dictionary<int, Node> _nodeMap)
+        public static Edge MapEdge(int id, EdgePL _edgePL, NodePL _source, NodePL _target)
         {
-            return new Edge(_nodeMap[_edgePL.Source.Id], _nodeMap[_edgePL.Target.Id])
-            {
-                Id = _edgePL.Id,
-                PortSource = MapPort(_edgePL.PortSource),
-                PortTarget = MapPort(_edgePL.PortTarget)
-            };
+            return new Edge(id, MapNode(_source), MapNode(_target), MapPort(_edgePL.PortSource), MapPort(_edgePL.PortTarget));
         }
+
+        public static Edge MapEdgeDict(EdgePL _edgePL, Dictionary<int, Node> _nodeMap)
+        {
+            return new Edge(_edgePL.Id, _nodeMap[_edgePL.Source.Id], _nodeMap[_edgePL.Target.Id], MapPort(_edgePL.PortSource), MapPort(_edgePL.PortTarget));
+        }
+
+        //public static Edge MapEdge(EdgePL _edgePL, Dictionary<int, Node> _nodeMap)
+        //{
+        //    return new Edge(_nodeMap[_edgePL.Source.Id], _nodeMap[_edgePL.Target.Id])
+        //    {
+        //        Id = _edgePL.Id,
+        //        PortSource = MapPort(_edgePL.PortSource),
+        //        PortTarget = MapPort(_edgePL.PortTarget)
+        //    };
+        //}
 
         public static Port MapPort(PortPL portPL)
         {

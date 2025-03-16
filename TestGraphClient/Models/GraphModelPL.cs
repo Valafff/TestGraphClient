@@ -22,6 +22,8 @@ namespace TestGraphClient.Models
             set { _graphName = value; OnPropertyChanged(nameof(GraphName)); }
         }
 
+        public Dictionary<int, NodePL> NodeMap { get; set; } = new Dictionary<int, NodePL>();
+
         public event PropertyChangedEventHandler? PropertyChanged;
         protected virtual void OnPropertyChanged(string propertyName)
         {
@@ -42,6 +44,13 @@ namespace TestGraphClient.Models
             Source = source;
             Target = target;
         }
+        public EdgePL(NodePL source, NodePL target, PortPL portSource, PortPL portTarget)
+        {
+            Source = source;
+            Target = target;
+            PortSource = portSource;
+            PortTarget = portTarget;
+        }
     }
 
     public class NodePL : BaseNotify
@@ -57,8 +66,6 @@ namespace TestGraphClient.Models
         }
 
         public NodeDataPL SimpleDataPL { get; set; }
-        //public List<PortPL> LeftPorts { get; set; }
-        //public List<PortPL> RightPorts { get; set; }
         public List<PortPL> LeftPorts { get; set; }
         public List<PortPL> RightPorts { get; set; }
 
