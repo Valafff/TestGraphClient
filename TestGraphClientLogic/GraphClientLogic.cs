@@ -55,15 +55,10 @@ namespace TestGraphClientLogic
         //Отправление модели графа
         public async Task<bool> SetGraph(Graph _graph)
         {
-            // Сериализуем объект Graph в JSON
             string json = JsonConvert.SerializeObject(GraphToGraphDto( _graph, out bool _error), Formatting.Indented);
-            // Создаем контент для отправки
             StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            // Отправляем POST-запрос
             HttpResponseMessage response = await client.PostAsync($"{serverUrl}/setgraphstate", content);
 
-            // Проверяем успешность запроса
             if (response.IsSuccessStatusCode)
             {
                 Console.WriteLine("Граф успешно отправлен на сервер.");
@@ -79,22 +74,30 @@ namespace TestGraphClientLogic
         //Создание узла
         public async Task<Graph> CreateNode(Node _newNode)
         {
-            //Если ошибка - возвращается null
-            if (_newNode == null) return null;
-            if (string.IsNullOrEmpty(_newNode.NodeName)) return null;
-
-            string json = JsonConvert.SerializeObject(_newNode, Formatting.Indented);
-            StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            HttpResponseMessage response = await client.PostAsync($"{serverUrl}/createnode", content);
-            if (response.IsSuccessStatusCode)
+            try
             {
-                GraphDtoToGrath(await response.Content.ReadAsStringAsync(), ref graph, out bool _error);
-                if (_error) return null;
-                return graph;
+                //Если ошибка - возвращается null
+                if (_newNode == null) return null;
+                if (string.IsNullOrEmpty(_newNode.NodeName)) return null;
+
+                string json = JsonConvert.SerializeObject(_newNode, Formatting.Indented);
+                StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                HttpResponseMessage response = await client.PostAsync($"{serverUrl}/createnode", content);
+                if (response.IsSuccessStatusCode)
+                {
+                    GraphDtoToGrath(await response.Content.ReadAsStringAsync(), ref graph, out bool _error);
+                    if (_error) return null;
+                    return graph;
+                }
+                //Если ошибка - возвращается null если statuscode 200 - возвращается обновленный граф
+                return null;
             }
-            //Если ошибка - возвращается null если statuscode 200 - возвращается обновленный граф
-            return null;
+            catch (Exception)
+            {
+                return null;
+            }
+
         }
 
         //Редактирование узла

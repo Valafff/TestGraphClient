@@ -47,20 +47,6 @@ namespace TestGraphClient.Mappers
                 Y = node.Y
             };
 
-            ////зашито в конструктор ноды
-            //// Маппирование портов
-            //foreach (var _port in node.Ports)
-            //{
-            //    var portPL = MapPort(_port);
-            //    if (_port.IsLeftSidePort)
-            //    {
-            //        nodePL.LeftPorts.Add(portPL);
-            //    }
-            //    else
-            //    {
-            //        nodePL.RightPorts.Add(portPL);
-            //    }
-            //}
             return nodePL;
         }
 
@@ -83,10 +69,6 @@ namespace TestGraphClient.Mappers
                 InputPortNumber = _port.InputPortNumber,
                 InputNodeName = _port.InputNodeName,
                 IsLeftSidePort = _port.IsLeftSidePort
-
-                ////Координаты в BL не хранятся
-                //X = 0, // Default value, can be adjusted as needed
-                //Y = 0  // Default value, can be adjusted as needed
             };
         }
 

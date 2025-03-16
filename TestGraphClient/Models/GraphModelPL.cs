@@ -59,8 +59,8 @@ namespace TestGraphClient.Models
         public NodeDataPL SimpleDataPL { get; set; }
         //public List<PortPL> LeftPorts { get; set; }
         //public List<PortPL> RightPorts { get; set; }
-        public ObservableCollection<PortPL> LeftPorts { get; set; }
-        public ObservableCollection<PortPL> RightPorts { get; set; }
+        public List<PortPL> LeftPorts { get; set; }
+        public List<PortPL> RightPorts { get; set; }
 
         private double _x;
         public double X
@@ -79,33 +79,23 @@ namespace TestGraphClient.Models
         public NodePL(string name, List<Port> _ports, int startY = 10, int stepY = 20)
         {
             NodeNamePL = name;
-            LeftPorts = new ObservableCollection<PortPL>();
-            RightPorts = new ObservableCollection<PortPL>();
-
-            //for (int i = 0; i < _ports.Count; i++)
-            //{
-            //    if (i % 2 == 0)
-            //    {
-            //        RightPorts.Add(new PortPL { NodeOwner = this, LocalId = i, Y = startY + i * stepY });
-            //    }
-            //    else
-            //    {
-            //        LeftPorts.Add(new PortPL { NodeOwner = this, LocalId = i, Y = startY + i * stepY });
-            //    }
-            //}
+            LeftPorts = new List<PortPL>();
+            RightPorts = new List<PortPL>();
 
             for (int i = 0; i < _ports.Count; i++)
             {
                 PortPL tempPortPL = BLL_to_PL_mapper.MapPort(_ports[i]);
                 tempPortPL.NodeOwner = this;
                 tempPortPL.LocalId = i;
-                tempPortPL.Y = startY + i * stepY;
+
                 if (!_ports[i].IsLeftSidePort)
                 {
+                    tempPortPL.Y = startY + RightPorts.Count * stepY;
                     RightPorts.Add(tempPortPL);
                 }
                 else
                 {
+                    tempPortPL.Y = startY + LeftPorts.Count * stepY;
                     LeftPorts.Add(tempPortPL);
                 }
             }

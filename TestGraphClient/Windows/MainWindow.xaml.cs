@@ -155,28 +155,6 @@ public partial class MainWindow : Window
     }
 
 
-
-    //private async void CreateNewNode(object sender, RoutedEventArgs e)
-    //{
-    //    SendMessage("Попытка создания нового узла");
-    //    NodePL ppl = new NodePL("test", new List<Port>());
-    //    Graph temp = await logic.CreateNode(PL_to_BLL_mapper.MapNode(ppl));
-    //    if (temp != null)
-    //    {
-    //        try
-    //        {
-    //            graph = BLL_to_PL_mapper.MapGraph(temp);
-    //            DataContext = graph;
-    //            SendMessage("Узел создан");
-    //        }
-    //        catch (Exception ex)
-    //        {
-    //            SendMessage($"Узел не создан: {ex}");
-    //        }
-    //    }
-    //    else { SendMessage("Ошибка создания нового узла"); }
-    //}
-
     private void ItemsControl_PreviewMouseMove(object sender, MouseEventArgs e)
     {
         if (_draggedNode != null && e.LeftButton == MouseButtonState.Pressed)

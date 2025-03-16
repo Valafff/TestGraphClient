@@ -53,14 +53,14 @@ namespace TestGraphClient.Windows
                 return;
             }
 
-            // Сохраняем данные
             NodeName = NodeNameTextBox.Text;
             PortCount = portCount;
             SelectedText = (TextComboBox.SelectedItem as ComboBoxItem)?.Content.ToString();
             Number = number;
 
-            // Закрываем окно с результатом DialogResult = true
+            //Условие записи данных в основную форму
             DialogResult = true;
+
             Close();
         }
     }

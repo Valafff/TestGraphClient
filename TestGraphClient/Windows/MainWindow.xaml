@@ -50,7 +50,7 @@
                     <DataTemplate>
                         <Grid>
                             <!-- Прямоугольник узла -->
-                            <Border BorderBrush="Black" BorderThickness="2" Background="LightGray" Padding="10" Width="150" Height="100">
+                            <Border BorderBrush="Black" BorderThickness="2" Background="LightGray" Padding="10" Width="180" Height="100">
                                 <StackPanel>
                                     <TextBlock Text="{Binding NodeNamePL}" FontWeight="Bold" HorizontalAlignment="Center" />
                                     <TextBlock Text="{Binding SimpleDataPL.SomeText}" FontWeight="Bold" HorizontalAlignment="Center" />
@@ -72,7 +72,7 @@
                                 </ItemsControl.ItemTemplate>
                                 <ItemsControl.ItemContainerStyle>
                                     <Style TargetType="ContentPresenter">
-                                        <Setter Property="Canvas.Left" Value="-10" />
+                                        <Setter Property="Canvas.Left" Value="0" />
                                         <Setter Property="Canvas.Top" Value="{Binding Y}" />
                                     </Style>
                                 </ItemsControl.ItemContainerStyle>
@@ -92,7 +92,7 @@
                                 </ItemsControl.ItemTemplate>
                                 <ItemsControl.ItemContainerStyle>
                                     <Style TargetType="ContentPresenter">
-                                        <Setter Property="Canvas.Left" Value="140" />
+                                        <Setter Property="Canvas.Left" Value="170" />
                                         <Setter Property="Canvas.Top" Value="{Binding Y}" />
                                     </Style>
                                 </ItemsControl.ItemContainerStyle>
