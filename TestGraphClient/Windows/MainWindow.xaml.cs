@@ -78,9 +78,9 @@ public partial class MainWindow : Window
         if (!string.IsNullOrWhiteSpace(_message))
         {
             ConsoleListBox.Items.Add(DateTime.Now.ToString("hh:mm:ss") + "\t" + _message);
+            ConsoleScrollViewer.ScrollToEnd();
         }
     }
-
 
     private async void GetGraph(object sender, RoutedEventArgs e)
     {

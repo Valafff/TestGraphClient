@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TestGraphClient.Windows"
         mc:Ignorable="d"
-        Title="MainWindow" Height="800" Width="800" Closing="Window_Closing">
+        Title="Тестовое задание" Height="800" Width="800" Closing="Window_Closing">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="25"/>
@@ -17,8 +17,6 @@
                 <MenuItem Header="Тест подключения" Click="ConnTest"/>
                 <MenuItem Header="Получить граф" Click ="GetGraph"/>
                 <MenuItem Header="Создать новый узел" Click="CreateNewNode"/>
-                <MenuItem Header="Создать ребро"/>
-                <MenuItem Header="Удалить ребро"/>
                 <MenuItem Header="Выход" Name="Exit" Click="Exit_Click"/>
             </MenuItem>
         </Menu>
@@ -98,8 +96,8 @@
             </ItemsControl>
         </Grid>
 
-        <ScrollViewer Grid.Row="2" Grid.ColumnSpan="2"  VerticalScrollBarVisibility="Auto">
-            <ListBox  x:Name="ConsoleListBox" Grid.Row="0" Margin="5" FontFamily="Consolas" FontSize="14"/>
+        <ScrollViewer x:Name="ConsoleScrollViewer" Grid.Row="2" Grid.ColumnSpan="2" VerticalScrollBarVisibility="Auto">
+            <ListBox x:Name="ConsoleListBox" Grid.Row="0" Margin="5" FontFamily="Consolas" FontSize="14"/>
         </ScrollViewer>
     </Grid>
 
