@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Shapes;
 using TestGraphClient.Models;
 using TestGraphModel;
 
@@ -20,7 +21,7 @@ namespace TestGraphClient.Mappers
 
             };
 
-            //Словарь для хранения  Id узлов
+            //Словарь для хранения  Id узлов для корректного добавления ребра в граф Quikgrapth
             Dictionary<int, NodePL> _nodeMap = new Dictionary<int, NodePL>();
             foreach (var _node in _graph.Vertices)
             {
@@ -34,19 +35,20 @@ namespace TestGraphClient.Mappers
                 EdgePL edgePL = MapEdge(_edge, _nodeMap);
                 graphPL.AddEdge(edgePL);
             }
-            //graphPL.NodeMap = _nodeMap;
             return graphPL;
         }
 
         public static NodePL MapNode(Node node)
         {
-            var nodePL = new NodePL(node.NodeName, node.Ports)
+            var nodePL = new NodePL(node.NodeName, node.Ports, node.X, node.Y)
             {
+                
                 Id = node.Id,
                 PortsNumber = node.PortsNumber,
                 SimpleDataPL = MapNodeData(node.SimpleData),
-                X = node.X,
-                Y = node.Y
+                //X = node.X,
+                //Y = node.Y
+                
             };
 
             return nodePL;
@@ -70,7 +72,9 @@ namespace TestGraphClient.Mappers
                 LocalId = _port.LocalId,
                 InputPortNumber = _port.InputPortNumber,
                 InputNodeName = _port.InputNodeName,
-                IsLeftSidePort = _port.IsLeftSidePort
+                IsLeftSidePort = _port.IsLeftSidePort,
+                X = _port.X,
+                Y = _port.Y
             };
         }
 
@@ -101,18 +105,6 @@ namespace TestGraphClient.Mappers
                 nodeMap[nodePL.Id] = node;
                 graph.AddVertex(node);
             }
-
-            //foreach (var edgePL in _graphPL.Edges)
-            //{
-            //    //EdgePL edgePL = MapEdge(_edge, _nodeMap);
-            //    //EdgePL(_nodeMap[_edge.Source.Id], _nodeMap[_edge.Target.Id]);
-
-            //    Edge edge = MapEdge(edgePL.Id, edgePL, nodeMap[edge.Source.Id], _graphPL.Vertices.FirstOrDefault(e => e.Id == edgePL.Target.Id));
-            //    //Edge edge = MapEdge(edgePL.Id, edgePL, _graphPL.Vertices.FirstOrDefault(e => e.Id == edgePL.Source.Id), _graphPL.Vertices.FirstOrDefault(e => e.Id == edgePL.Target.Id));
-            //    graph.AddEdge(edge);
-            //}
-  
-
             foreach (var edgePL in _graphPL.Edges)
             {
                 Edge edge = MapEdgeDict(edgePL, nodeMap);
@@ -158,16 +150,6 @@ namespace TestGraphClient.Mappers
             return new Edge(_edgePL.Id, _nodeMap[_edgePL.Source.Id], _nodeMap[_edgePL.Target.Id], MapPort(_edgePL.PortSource), MapPort(_edgePL.PortTarget));
         }
 
-        //public static Edge MapEdge(EdgePL _edgePL, Dictionary<int, Node> _nodeMap)
-        //{
-        //    return new Edge(_nodeMap[_edgePL.Source.Id], _nodeMap[_edgePL.Target.Id])
-        //    {
-        //        Id = _edgePL.Id,
-        //        PortSource = MapPort(_edgePL.PortSource),
-        //        PortTarget = MapPort(_edgePL.PortTarget)
-        //    };
-        //}
-
         public static Port MapPort(PortPL portPL)
         {
             return new Port
@@ -176,7 +158,9 @@ namespace TestGraphClient.Mappers
                 LocalId = portPL.LocalId,
                 InputPortNumber = portPL.InputPortNumber,
                 InputNodeName = portPL.InputNodeName,
-                IsLeftSidePort = portPL.IsLeftSidePort
+                IsLeftSidePort = portPL.IsLeftSidePort,
+                X = portPL.X,
+                Y = portPL.Y
             };
         }
 

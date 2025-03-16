@@ -17,6 +17,7 @@ using TestGraphClient.Mappers;
 using TestGraphClient.Models;
 using TestGraphClientLogic;
 using TestGraphModel;
+using static QuikGraph.Algorithms.Assignment.HungarianAlgorithm;
 
 namespace TestGraphClient.Windows;
 
@@ -35,7 +36,7 @@ public partial class MainWindow : Window
     private Line _tempLine;
     private bool isDragging = false; // Флаг для отслеживания перетаскивания
     private bool isDraggingStartPoint = false; // Флаг для определения, какой конец линии перетаскивается
-    private Dictionary<EdgePL, Line> _edgeLines = new Dictionary<EdgePL, Line>();
+    //private Dictionary<EdgePL, Line> EdgeLines = new Dictionary<EdgePL, Line>();
 
     //Работа с визуальной частью
     private NodePL _draggedNode; // Узел, который перемещается
@@ -90,8 +91,7 @@ public partial class MainWindow : Window
             try
             {
                 graph = BLL_to_PL_mapper.MapGraph(temp);
-                GetSavedNodePositions();
-
+                Line_Inicialization();
                 DataContext = graph;
                 SendMessage("Граф получен");
             }
@@ -160,7 +160,15 @@ public partial class MainWindow : Window
             // Обновляем координаты узла с учетом смещения
             _draggedNode.X = position.X - _offset.X;
             _draggedNode.Y = position.Y - _offset.Y;
+
+            var linesToRemove = GraphCanvas.Children.OfType<Line>().ToList();
+            foreach (var line in linesToRemove)
+            {
+                GraphCanvas.Children.Remove(line);
+            }
+            Line_Inicialization();
         }
+
     }
 
 
@@ -196,37 +204,6 @@ public partial class MainWindow : Window
             GraphCanvas.CaptureMouse();
             isDragging = true;
         }
-        //else
-        //{
-        //    // Проверяем, что второй порт принадлежит другому узлу
-        //    if (port.NodeOwner == tempSourcePort.NodeOwner)
-        //    {
-        //        SendMessage("Нельзя соединить порты одного узла!");
-        //        return;
-        //    }
-
-        //    // Выбираем второй порт
-        //    tempTargetPort = port;
-        //    SendMessage($"Выбран второй порт: Узел-владелец: {nodeOwner.NodeNamePL}, Локальный ID порта: {port.LocalId}");
-
-        //    // Удаляем временную линию
-        //    GraphCanvas.Children.Remove(_tempLine);
-
-        //    // Отписываемся от событий мыши
-        //    GraphCanvas.MouseMove -= GraphCanvas_MouseMove;
-        //    GraphCanvas.MouseLeftButtonUp -= GraphCanvas_MouseLeftButtonUp;
-
-        //    // Освобождаем мышь
-        //    GraphCanvas.ReleaseMouseCapture();
-
-        //    // Создаем ребро между портами
-        //    //CreateEdge(_selectedPort1, _selectedPort2);
-
-        //    // Сбрасываем выбранные порты
-        //    tempSourcePort = null;
-        //    tempTargetPort = null;
-        //    isDragging = false;
-        //}
     }
 
     private void GraphCanvas_MouseMove(object sender, MouseEventArgs e)
@@ -252,7 +229,7 @@ public partial class MainWindow : Window
             GraphCanvas.MouseLeftButtonUp -= GraphCanvas_MouseLeftButtonUp;
 
             // Удаляем временную линию
-            GraphCanvas.Children.Remove(_tempLine);
+
 
             // Освобождаем мышь
             GraphCanvas.ReleaseMouseCapture();
@@ -266,8 +243,8 @@ public partial class MainWindow : Window
                 if (tempSourcePort != null && tempTargetPort != null)
                 {
                     SendMessage("Попытка создания ребра");
-                    EdgePL tempEpdge = new EdgePL(tempSourcePort.NodeOwner, tempTargetPort.NodeOwner, tempSourcePort, tempTargetPort);
-                    Graph temp = await logic.CreateOrEditEdge(PL_to_BLL_mapper.MapEdge(tempEpdge.Id, tempEpdge, tempSourcePort.NodeOwner, tempTargetPort.NodeOwner));
+                    EdgePL tempEdge = new EdgePL(tempSourcePort.NodeOwner, tempTargetPort.NodeOwner, tempSourcePort, tempTargetPort);
+                    Graph temp = await logic.CreateOrEditEdge(PL_to_BLL_mapper.MapEdge(tempEdge.Id, tempEdge, tempSourcePort.NodeOwner, tempTargetPort.NodeOwner));
                     if (temp != null)
                     {
                         try
@@ -275,14 +252,26 @@ public partial class MainWindow : Window
                             graph = BLL_to_PL_mapper.MapGraph(temp);
                             GetSavedNodePositions();
                             DataContext = graph;
-                            SendMessage("Узел создан");
+                            SendMessage("Ребро создано");
+                            Line tempLine = new Line
+                            {
+                                Stroke = Brushes.Black,
+                                StrokeThickness = 3,
+                                X1 = tempSourcePort.NodeOwner.X + tempSourcePort.X,
+                                Y1 = tempSourcePort.NodeOwner.Y + tempSourcePort.Y + 5,
+                                X2 = tempTargetPort.NodeOwner.X + tempTargetPort.X,
+                                Y2 = tempTargetPort.NodeOwner.Y + tempTargetPort.Y + 5
+                            };
+                            GraphCanvas.Children.Remove(_tempLine);
+                            GraphCanvas.Children.Add(tempLine);
                         }
                         catch (Exception ex)
                         {
-                            SendMessage($"Узел не создан: {ex}");
+                            GraphCanvas.Children.Remove(_tempLine);
+                            SendMessage($"Ребро не создано: {ex}");
                         }
                     }
-                    else { SendMessage("Ошибка создания нового узла"); }
+                    else { SendMessage("Ошибка создания ребра"); GraphCanvas.Children.Remove(_tempLine); }
                 }
             }
 
@@ -472,5 +461,40 @@ public partial class MainWindow : Window
     private double Distance(Point p1, Point p2)
     {
         return Math.Sqrt(Math.Pow(p1.X - p2.X, 2) + Math.Pow(p1.Y - p2.Y, 2));
+    }
+
+    private void Line_Inicialization()
+    {
+        foreach (var edge in graph.Edges)
+        {
+            Point sourcePoint;
+            sourcePoint.X = edge.Source.X;
+            sourcePoint.Y = edge.Source.Y;
+            Point targetPoint;
+            targetPoint.X = edge.Target.X;
+            targetPoint.Y = edge.Target.Y;
+
+            //Line tempLine = new Line
+            //{
+            //    Stroke = Brushes.Black,
+            //    StrokeThickness = 3,
+            //    X1 = sourcePoint.X + (edge.PortSource.IsLeftSidePort ? 0 : 180),
+            //    Y1 = sourcePoint.Y + (edge.PortSource.LocalId + 1) * 20 + 15,
+            //    X2 = targetPoint.X + (edge.PortTarget.IsLeftSidePort ? 0 : 180),
+            //    Y2 = targetPoint.Y + (edge.PortTarget.LocalId + 1) * 20 + 15,
+            //};
+            //GraphCanvas.Children.Add(tempLine);
+
+            Line tempLine = new Line
+            {
+                Stroke = Brushes.Black,
+                StrokeThickness = 3,
+                X1 = sourcePoint.X + edge.PortSource.X,
+                Y1 = sourcePoint.Y + edge.PortSource.Y + 5,
+                X2 = targetPoint.X + edge.PortTarget.X,
+                Y2 = targetPoint.Y + edge.PortTarget.Y + 5
+            };
+            GraphCanvas.Children.Add(tempLine);
+        }
     }
 }
