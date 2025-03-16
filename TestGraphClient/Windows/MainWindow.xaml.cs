@@ -174,15 +174,29 @@ public partial class MainWindow : Window
         }
     }
 
+    //Обработка действий с портами
     private void Port_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
+        var ellipse = sender as Ellipse;
+        if (ellipse == null) return;
 
+        var port = ellipse.DataContext as PortPL;
+        if (port == null) return;
+
+        var nodeOwner = port.NodeOwner;
+        if (nodeOwner == null) return;
+        SendMessage($"Нажат порт: Узел-владелец = {nodeOwner.NodeNamePL}, Локальный ID порта = {port.LocalId}");
     }
 
     private void Node_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-
-
+        //Проверка нажатия на порт
+        if (e.OriginalSource is Ellipse)
+        {
+            // Если клик был на порту событие обработано, едем дальше
+            e.Handled = false;
+            return;
+        }
 
         //Нода, на которую нажали
         var contentPresenter = sender as ContentPresenter;
@@ -219,23 +233,23 @@ public partial class MainWindow : Window
                 node.NodeNamePL = editNodeWindow.NodeName;
                 node.SimpleDataPL.SomeText = editNodeWindow.SomeText;
                 node.SimpleDataPL.SomeValue = editNodeWindow.Number;
-            }
-            Graph temp = await logic.EditNode(PL_to_BLL_mapper.MapNode(node));
-            if (temp != null)
-            {
-                try
+                Graph temp = await logic.EditNode(PL_to_BLL_mapper.MapNode(node));
+                if (temp != null)
                 {
-                    graph = BLL_to_PL_mapper.MapGraph(temp);
-                    GetSavedNodePositions();
-                    DataContext = graph;
-                    SendMessage("Узел отредактирован");
+                    try
+                    {
+                        graph = BLL_to_PL_mapper.MapGraph(temp);
+                        GetSavedNodePositions();
+                        DataContext = graph;
+                        SendMessage("Узел отредактирован");
+                    }
+                    catch (Exception ex)
+                    {
+                        SendMessage($"Узел не отредактирован: {ex}");
+                    }
                 }
-                catch (Exception ex)
-                {
-                    SendMessage($"Узел не отредактирован: {ex}");
-                }
-            }
-            else { SendMessage("Ошибка редактирования узла"); }
+            }       
+            else { SendMessage("Узел не редактировался"); }
         }
 
 

@@ -49,7 +49,7 @@
                     <DataTemplate>
                         <Grid>
                             <!-- Прямоугольник узла -->
-                            <Border BorderBrush="Black" BorderThickness="2" Background="LightGray" Padding="10" Width="180" Height="110" PreviewMouseLeftButtonUp="Node_PreviewMouseLeftButtonUp">
+                            <Border BorderBrush="Black" BorderThickness="2" Background="LightGray" Padding="20" Width="180" Height="110" PreviewMouseLeftButtonUp="Node_PreviewMouseLeftButtonUp">
                                 <StackPanel>
                                     <TextBlock Text="{Binding NodeNamePL}" FontWeight="Bold" HorizontalAlignment="Center" />
                                     <TextBlock Text="{Binding SimpleDataPL.SomeText}" FontWeight="Bold" HorizontalAlignment="Center" />
